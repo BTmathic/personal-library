@@ -37,16 +37,20 @@ module.exports = function (app) {
     .post((req, res) => {
       //response will contain new book object including atleast _id and title
       const title = req.body.title;
-      const newBook = new Book({
-        title: title,
-        comments: []
-      });
-      newBook.save((err, data) => {
-        if (err) {
-          console.log('Error saving book ', err);
-        }
-        res.send({title: title, _id: newBook._id});
-      });
+      if (!title) {
+        res.send('no title given');
+      } else {
+        const newBook = new Book({
+          title: title,
+          comments: []
+        });
+        newBook.save((err, data) => {
+          if (err) {
+            console.log('Error saving book ', err);
+          }
+          res.send({title: title, _id: newBook._id});
+        });
+      }
     })
     
     .delete((req, res) => {
@@ -60,13 +64,11 @@ module.exports = function (app) {
       });
     });
 
-
-
   app.route('/api/books/:id')
     .get((req, res) => {
       const bookid = req.params.id;
       Book.findOne({_id: bookid}, (err, data) => {
-        if (err) {
+        if (err && bookid.length === 24) {
           console.log('Error finding book ', err);
         }
         if (data !== undefined) {
